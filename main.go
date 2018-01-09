@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gotoolkit/hook/handlers"
+	"github.com/gotoolkit/hook/pkg/handlers"
 )
 
 func main() {
