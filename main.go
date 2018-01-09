@@ -6,9 +6,11 @@ import (
 	"os"
 
 	"github.com/gotoolkit/hook/pkg/handlers"
+	"github.com/gotoolkit/hook/pkg/version"
 )
 
 func main() {
+	log.Printf("Starting the service...\ncommit: %s, build time: %s, release: %s", version.Commit, version.BuildTime, version.Release)
 	log.Print("Starting the service...")
 	port := os.Getenv("PORT")
 	if port == "" {
