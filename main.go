@@ -7,41 +7,60 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
-	"github.com/gotoolkit/hook/pkg/handlers"
-	"github.com/gotoolkit/hook/pkg/version"
+	"github.com/gotoolkit/cms/pkg/handlers"
+	"github.com/gotoolkit/cms/pkg/version"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
 )
 
 func main() {
-	log.Printf("Starting the service...\ncommit: %s, build time: %s, release: %s", version.Commit, version.BuildTime, version.Release)
-	log.Print("Starting the service...")
+	log.Printf(
+		"Starting the service...\ncommit: %s, build time: %s, release: %s",
+		version.Commit, version.BuildTime, version.Release,
+	)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("Port is not set.")
 	}
-	router := handlers.Router(version.BuildTime, version.Commit, version.Release)
 
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	dbSource := os.Getenv("MYSQL_DATABASE")
+	if port == "" {
+		log.Fatal("Mysql database source is not set.")
+	}
 
-	srv := http.Server{
+	db, err := gorm.Open("mysql", dbSource)
+	if err != nil {
+		log.Fatalf("Error open mysql database connection, %s", err)
+	}
+	defer db.Close()
+
+	r := handlers.Router(version.BuildTime, version.Commit, version.Release)
+
+	srv := &http.Server{
 		Addr:    ":" + port,
-		Handler: router,
+		Handler: r,
 	}
+
 	go func() {
-		srv.ListenAndServe()
+		// service connections
+		if err := srv.ListenAndServe(); err != nil {
+			log.Printf("listen: %s\n", err)
+		}
 	}()
-	log.Print("The service is ready to listen and serve.")
 
-	killSignal := <-interrupt
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutdown Server ...")
 
-	switch killSignal {
-	case os.Interrupt:
-		log.Println("Got SIGINT...")
-	case syscall.SIGTERM:
-		log.Println("Got SIGTERM...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server Shutdown:", err)
 	}
-	log.Print("The service is shutting down...")
-	srv.Shutdown(context.Background())
-	log.Println("Done")
+	log.Println("Server exiting")
 }

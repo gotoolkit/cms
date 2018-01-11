@@ -1,6 +1,7 @@
-APP?=hook
+APP?=cms
 PORT?=8000
-PROJECT?=github.com/gotoolkit/hook
+MYSQL_DATABASE?=root:root@tcp(docker.for.mac.localhost:3306)/sme?charset=utf8mb4
+PROJECT?=github.com/gotoolkit/cms
 
 RELEASE?=0.0.1
 COMMIT?=$(shell git rev-parse --short HEAD)
@@ -21,17 +22,13 @@ build: clean
 		-X ${PROJECT}/pkg/version.BuildTime=${BUILD_TIME} " \
 		-o ${APP}
 
-run: build
-	PORT=${PORT} ./${APP}
-
 test:
 	go test -v -race ./...
-
 
 container: build
 	docker build -t ${CONTAINER_IMAGE}:${RELEASE} .
 
-rund: container
+run: container
 	docker stop ${APP} || true && docker rm ${APP} || true
 	docker run --name ${APP} -p ${PORT}:${PORT} --rm -e "PORT=${PORT}" ${CONTAINER_IMAGE}:${RELEASE}
 
