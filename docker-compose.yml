@@ -1,0 +1,31 @@
+version: "3"
+
+volumes: 
+  mysql-data:
+
+services: 
+  app:
+    image: containerize/cms:0.1.0
+    restart: always
+    environment: 
+      - PORT=8000
+      - MYSQL_DATABASE=root:root@tcp(mysql:3306)/sme?charset=utf8mb4&parseTime=true
+    ports:
+      - "8000:8000"
+  mysql:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=sme
+    restart: always
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "13306:3306"
+  ui:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment: 
+      - PMA_HOST=mysql
+    ports:
+      - "8085:80"
