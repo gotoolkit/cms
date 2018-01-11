@@ -9,11 +9,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gotoolkit/cms/pkg/database"
 	"github.com/gotoolkit/cms/pkg/handlers"
 	"github.com/gotoolkit/cms/pkg/version"
-
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
 )
 
 func main() {
@@ -32,11 +30,10 @@ func main() {
 		log.Fatal("Mysql database source is not set.")
 	}
 
-	db, err := gorm.Open("mysql", dbSource)
+	err := database.Setup(dbSource)
 	if err != nil {
 		log.Fatalf("Error open mysql database connection, %s", err)
 	}
-	defer db.Close()
 
 	r := handlers.Router(version.BuildTime, version.Commit, version.Release)
 
@@ -56,11 +53,17 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 	log.Println("Shutdown Server ...")
+	
+	if err := database.CloseDB(); err != nil {
+		log.Fatal("Database Shutdown:", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("Server Shutdown:", err)
 	}
+
 	log.Println("Server exiting")
 }

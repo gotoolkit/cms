@@ -1,6 +1,6 @@
 APP?=cms
 PORT?=8000
-MYSQL_DATABASE?=root:root@tcp(docker.for.mac.localhost:3306)/sme?charset=utf8mb4
+MYSQL_DATABASE?=root:root@tcp(docker.for.mac.localhost:3306)/sme?charset=utf8mb4&parseTime=true
 PROJECT?=github.com/gotoolkit/cms
 
 RELEASE?=0.0.1
@@ -30,7 +30,10 @@ container: build
 
 run: container
 	docker stop ${APP} || true && docker rm ${APP} || true
-	docker run --name ${APP} -p ${PORT}:${PORT} --rm -e "PORT=${PORT}" ${CONTAINER_IMAGE}:${RELEASE}
+	docker run --name ${APP} -p ${PORT}:${PORT} --rm \
+		-e "PORT=${PORT}" \
+		-e "MYSQL_DATABASE=${MYSQL_DATABASE}" \
+		${CONTAINER_IMAGE}:${RELEASE}
 
 push: container
 	docker push ${CONTAINER_IMAGE}:${RELEASE}
