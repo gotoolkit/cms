@@ -4,9 +4,16 @@ volumes:
   mysql-data:
 
 services: 
+  watchtower:
+    image: v2tec/watchtower
+    volumes: 
+      - /var/run/docker.sock:/var/run/docker.sock 
+    command: --label-enable
   app:
-    image: containerize/cms:0.1.0
+    image: containerize/cms:latest
     restart: always
+    labels: 
+      - com.centurylinklabs.watchtower.enable=true
     environment: 
       - PORT=8000
       - MYSQL_DATABASE=root:root@tcp(mysql:3306)/sme?charset=utf8mb4&parseTime=true

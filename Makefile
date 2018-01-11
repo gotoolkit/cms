@@ -27,6 +27,7 @@ test:
 
 container: build
 	docker build -t ${CONTAINER_IMAGE}:${RELEASE} .
+	docker build -t ${CONTAINER_IMAGE}:latest .
 
 run: container
 	docker stop ${APP} || true && docker rm ${APP} || true
@@ -37,3 +38,7 @@ run: container
 
 push: container
 	docker push ${CONTAINER_IMAGE}:${RELEASE}
+	docker push ${CONTAINER_IMAGE}:latest
+
+rsync: 
+	rsync -azvh docker-compose.yml root@192.168.20.23:/data/compose/sme-api
