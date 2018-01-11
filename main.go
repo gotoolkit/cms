@@ -53,7 +53,7 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 	log.Println("Shutdown Server ...")
-	
+
 	if err := database.CloseDB(); err != nil {
 		log.Fatal("Database Shutdown:", err)
 	}

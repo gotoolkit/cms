@@ -15,13 +15,18 @@ func register(c *gin.Context) {
 
 	err := c.BindJSON(&user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "Missing Username or Password")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Missing Username or Password",
+		})
 		return
 	}
 
-	userExists := database.GetDB().Where("username = ?", user.Username).First(&models.User{}).RecordNotFound()
-	if !userExists {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "User already registed")
+	if !database.GetDB().Where("username = ?", user.Username).First(&models.User{}).RecordNotFound() {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "User already registed",
+		})
 		return
 	}
 
@@ -38,7 +43,10 @@ func register(c *gin.Context) {
 
 	tokenString, err := token.SignedString([]byte("secret key"))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, "Create JWT Token faild")
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"code":    http.StatusUnauthorized,
+			"message": "Create JWT Token faild",
+		})
 		return
 	}
 

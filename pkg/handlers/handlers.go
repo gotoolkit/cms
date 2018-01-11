@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"log"
+	"net/http/pprof"
 	"sync/atomic"
 	"time"
 
@@ -25,6 +26,18 @@ func Router(buildTime, commit, release string) *gin.Engine {
 	r.GET("/home", gin.WrapF(home(buildTime, commit, release)))
 	r.GET("/healthz", gin.WrapF(healthz))
 	r.GET("/readyz", gin.WrapF(readyz(isReady)))
+
+	r.GET("/debug/pprof/", gin.WrapF(pprof.Index))
+	r.GET("/debug/pprof/heap", gin.WrapF(pprof.Index))
+	r.GET("/debug/pprof/goroutine", gin.WrapF(pprof.Index))
+	r.GET("/debug/pprof/block", gin.WrapF(pprof.Index))
+	r.GET("/debug/pprof/threadcreate", gin.WrapF(pprof.Index))
+	r.GET("/debug/pprof/mutex", gin.WrapF(pprof.Index))
+	r.GET("/debug/pprof/cmdline", gin.WrapF(pprof.Cmdline))
+	r.GET("/debug/pprof/profile", gin.WrapF(pprof.Profile))
+	r.GET("/debug/pprof/symbol", gin.WrapF(pprof.Symbol))
+	r.POST("/debug/pprof/symbol", gin.WrapF(pprof.Symbol))
+	r.GET("/debug/pprof/trace", gin.WrapF(pprof.Trace))
 
 	r.POST("/login", middlewares.Jwt().LoginHandler)
 	r.POST("/signup", register)

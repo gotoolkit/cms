@@ -3,7 +3,7 @@ PORT?=8000
 MYSQL_DATABASE?=root:root@tcp(docker.for.mac.localhost:3306)/sme?charset=utf8mb4&parseTime=true
 PROJECT?=github.com/gotoolkit/cms
 
-RELEASE?=0.0.1
+RELEASE?=0.1.0
 COMMIT?=$(shell git rev-parse --short HEAD)
 BUILD_TIME?=$(shell date -u '+%Y-%m-%d_%H:%M:%S')
 
