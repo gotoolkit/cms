@@ -23,10 +23,29 @@ func Router(buildTime, commit, release string) *gin.Engine {
 	}()
 	r := gin.Default()
 
-	r.GET("/home", gin.WrapF(home(buildTime, commit, release)))
+	r.GET("/version", gin.WrapF(home(buildTime, commit, release)))
 	r.GET("/healthz", gin.WrapF(healthz))
 	r.GET("/readyz", gin.WrapF(readyz(isReady)))
 
+	if gin.IsDebugging() {
+		debugRouter(r)
+	}
+
+	r.POST("/login", middlewares.Jwt().LoginHandler)
+	r.POST("/signup", register)
+	r.GET("message/:phone", sendMessage)
+
+	auth := r.Group("/auth")
+	auth.Use(middlewares.Jwt().MiddlewareFunc())
+	{
+		auth.GET("/hello", helloHandler)
+		auth.GET("/refresh_token", middlewares.Jwt().RefreshHandler)
+	}
+
+	return r
+}
+
+func debugRouter(r *gin.Engine) {
 	r.GET("/debug/pprof/", gin.WrapF(pprof.Index))
 	r.GET("/debug/pprof/heap", gin.WrapF(pprof.Index))
 	r.GET("/debug/pprof/goroutine", gin.WrapF(pprof.Index))
@@ -38,18 +57,6 @@ func Router(buildTime, commit, release string) *gin.Engine {
 	r.GET("/debug/pprof/symbol", gin.WrapF(pprof.Symbol))
 	r.POST("/debug/pprof/symbol", gin.WrapF(pprof.Symbol))
 	r.GET("/debug/pprof/trace", gin.WrapF(pprof.Trace))
-
-	r.POST("/login", middlewares.Jwt().LoginHandler)
-	r.POST("/signup", register)
-
-	auth := r.Group("/auth")
-	auth.Use(middlewares.Jwt().MiddlewareFunc())
-	{
-		auth.GET("/hello", helloHandler)
-		auth.GET("/refresh_token", middlewares.Jwt().RefreshHandler)
-	}
-
-	return r
 }
 
 func helloHandler(c *gin.Context) {

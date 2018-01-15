@@ -2,8 +2,9 @@ APP?=cms
 PORT?=8000
 MYSQL_DATABASE?=root:root@tcp(docker.for.mac.localhost:3306)/sme?charset=utf8mb4&parseTime=true
 PROJECT?=github.com/gotoolkit/cms
+TELEGRAM_HORN_URL?=https://integram.org/ckRFAE6KoTu
 
-RELEASE?=0.1.0
+RELEASE?=0.1.1
 COMMIT?=$(shell git rev-parse --short HEAD)
 BUILD_TIME?=$(shell date -u '+%Y-%m-%d_%H:%M:%S')
 
@@ -34,6 +35,7 @@ run: container
 	docker run --name ${APP} -p ${PORT}:${PORT} --rm \
 		-e "PORT=${PORT}" \
 		-e "MYSQL_DATABASE=${MYSQL_DATABASE}" \
+		-e "TELEGRAM_HORN_URL=${TELEGRAM_HORN_URL}" \
 		${CONTAINER_IMAGE}:${RELEASE}
 
 push: container

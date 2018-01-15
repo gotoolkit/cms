@@ -10,4 +10,5 @@ type User struct {
 	DeletedAt *time.Time `sql:"index" json:"deleted_at"`
 	Username  string     `json:"username"`
 	Password  string     `json:"password"`
+	Phone     Phone      `gorm:"ForeignKey:UserRefer"`
 }

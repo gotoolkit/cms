@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"fmt"
+	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/gotoolkit/cms/pkg/teleport"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gotoolkit/cms/pkg/database"
@@ -53,5 +57,25 @@ func register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"token":  tokenString,
 		"expire": expire.Format(time.RFC3339),
+	})
+}
+
+func sendMessage(c *gin.Context) {
+	phone := c.Param("phone")
+	rand.Seed(time.Now().UnixNano())
+	code := rand.Intn(999999-99999) + 99999
+	err := teleport.SendMessage(fmt.Sprintf("phone: %s \ncode: %d", phone, code))
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "send telegram message failed",
+			"error":   err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Message sended",
 	})
 }

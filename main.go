@@ -7,10 +7,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/gotoolkit/cms/pkg/database"
 	"github.com/gotoolkit/cms/pkg/handlers"
+	"github.com/gotoolkit/cms/pkg/teleport"
 	"github.com/gotoolkit/cms/pkg/version"
 )
 
@@ -26,7 +26,7 @@ func main() {
 	}
 
 	dbSource := os.Getenv("MYSQL_DATABASE")
-	if port == "" {
+	if dbSource == "" {
 		log.Fatal("Mysql database source is not set.")
 	}
 
@@ -34,6 +34,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error open mysql database connection, %s", err)
 	}
+
+	teleSource := os.Getenv("TELEGRAM_HORN_URL")
+	if teleSource == "" {
+		log.Fatal("Telegram notification source is not set.")
+	}
+
+	teleport.Setup(teleSource)
 
 	r := handlers.Router(version.BuildTime, version.Commit, version.Release)
 
@@ -53,15 +60,9 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 	log.Println("Shutdown Server ...")
+	database.CloseDB()
 
-	if err := database.CloseDB(); err != nil {
-		log.Fatal("Database Shutdown:", err)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(context.Background()); err != nil {
 		log.Fatal("Server Shutdown:", err)
 	}
 

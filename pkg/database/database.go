@@ -14,7 +14,7 @@ var (
 // Setup creates a connection to mysql database and migrates any new Models
 func Setup(source string) error {
 	db, err = gorm.Open("mysql", source)
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{}, &models.Phone{})
 	return err
 }
 
