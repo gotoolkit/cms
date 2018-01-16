@@ -15,7 +15,7 @@ func Setup(source string) {
 
 // SendMessage ...
 func SendMessage(msg string) error {
-	data := fmt.Sprintf(`{"text": %q}`, msg)
+	data := fmt.Sprintf(`{"chatId": "-304626054", "message": %q }`, msg)
 	_, err := http.Post(teleportURL, "application/json", strings.NewReader(data))
 	return err
 }
