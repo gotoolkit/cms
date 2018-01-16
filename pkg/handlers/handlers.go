@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"log"
+	"net/http"
 	"net/http/pprof"
 	"sync/atomic"
 	"time"
@@ -78,7 +79,7 @@ func helloHandler(c *gin.Context) {
 }
 
 func abortWithStatus(c *gin.Context, code int, msg string) {
-	c.AbortWithStatusJSON(code, gin.H{
+	c.AbortWithStatusJSON(http.StatusOK, gin.H{
 		"code":    code,
 		"message": msg,
 	})
