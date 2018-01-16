@@ -82,7 +82,7 @@ func sendMessage(c *gin.Context) {
 	}
 
 	if has {
-		abortWithStatus(c, http.StatusBadRequest, fmt.Sprintf("Phone already registed: %v", err))
+		abortWithStatus(c, http.StatusBadRequest, fmt.Sprintf("Phone already registed:"))
 		return
 	}
 
