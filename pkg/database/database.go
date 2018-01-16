@@ -2,28 +2,26 @@ package database
 
 import (
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gotoolkit/cms/pkg/models"
-	"github.com/jinzhu/gorm"
+	"github.com/go-xorm/xorm"
 )
 
 var (
-	db  *gorm.DB
-	err error
+	engine *xorm.Engine
+	err    error
 )
 
 // Setup creates a connection to mysql database and migrates any new Models
 func Setup(source string) error {
-	db, err = gorm.Open("mysql", source)
-	db.AutoMigrate(&models.User{}, &models.Phone{})
+	engine, err = xorm.NewEngine("mysql", source)
 	return err
 }
 
 // GetDB ...
-func GetDB() *gorm.DB {
-	return db
+func GetDB() *xorm.Engine {
+	return engine
 }
 
 // CloseDB ...
 func CloseDB() error {
-	return db.Close()
+	return engine.Close()
 }

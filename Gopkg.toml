@@ -38,5 +38,5 @@
   version = "1.0.0"
 
 [[constraint]]
-  name = "github.com/jinzhu/gorm"
-  version = "1.0.0"
+  name = "github.com/go-xorm/xorm"
+  version = "0.6.4"

@@ -27,21 +27,27 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/golang/protobuf"
-  packages = ["proto"]
-  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
+  name = "github.com/go-xorm/builder"
+  packages = ["."]
+  revision = "a4a881a4e552fcb5473f39e8b9f7d9f3457a7fb0"
 
 [[projects]]
-  name = "github.com/jinzhu/gorm"
+  name = "github.com/go-xorm/core"
   packages = ["."]
-  revision = "5174cc5c242a728b435ea2be8a2f7f998e15429b"
-  version = "v1.0"
+  revision = "da1adaf7a28ca792961721a34e6e04945200c890"
+  version = "v0.5.7"
+
+[[projects]]
+  name = "github.com/go-xorm/xorm"
+  packages = ["."]
+  revision = "1933dd69e294c0a26c0266637067f24dbb25770c"
+  version = "v0.6.4"
 
 [[projects]]
   branch = "master"
-  name = "github.com/jinzhu/inflection"
-  packages = ["."]
-  revision = "1c35d901db3da928c72a72d8458480cc9ade058f"
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
 
 [[projects]]
   name = "github.com/mattn/go-isatty"
@@ -82,6 +88,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1d467776e0986498ed43f2ddb73466a137d465b81b2a69eba2d234c25539c8d0"
+  inputs-digest = "bc061619a0332ab33865aa336aa9dedf079d73a3f5bd3b0d30bcfff585cbee2f"
   solver-name = "gps-cdcl"
   solver-version = 1

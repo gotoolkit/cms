@@ -1,9 +1,10 @@
 package middlewares
 
 import (
+	"net/http"
 	"time"
 
-	"github.com/gotoolkit/cms/pkg/models"
+	"github.com/gotoolkit/cms/pkg/model"
 
 	"github.com/gotoolkit/cms/pkg/database"
 
@@ -18,16 +19,27 @@ var DefaultJwt = &jwt.GinJWTMiddleware{
 	Timeout:    time.Minute,
 	MaxRefresh: time.Hour,
 	Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
-		if !database.GetDB().Where("username = ?", userId).Where("password = ?", password).Find(&models.User{}).RecordNotFound() {
-			return userId, true
+		total, err := database.GetDB().Where("username = ?", userId).Where("password = ?", password).Count(&model.PurchaseUser{})
+		if err != nil {
+			return userId, false
 		}
-		return userId, false
+		if total != 1 {
+			return userId, false
+		}
+		return userId, true
 	},
 	Authorizator: func(userId string, c *gin.Context) bool {
-		return !database.GetDB().Where("username = ?", userId).First(&models.User{}).RecordNotFound()
+		total, err := database.GetDB().Where("username = ?", userId).Count(&model.PurchaseUser{})
+		if err != nil {
+			return false
+		}
+		if total != 1 {
+			return false
+		}
+		return true
 	},
 	Unauthorized: func(c *gin.Context, code int, message string) {
-		c.JSON(code, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"code":    code,
 			"message": message,
 		})

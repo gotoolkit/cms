@@ -2,7 +2,7 @@ APP?=cms
 PORT?=8000
 MYSQL_DATABASE?=root:root@tcp(docker.for.mac.localhost:3306)/sme?charset=utf8mb4&parseTime=true
 PROJECT?=github.com/gotoolkit/cms
-TELEGRAM_HORN_URL?=https://integram.org/ckRFAE6KoTu
+TELEGRAM_HORN_URL?=https://integram.org/crVSWQfVmah
 
 RELEASE?=0.1.1
 COMMIT?=$(shell git rev-parse --short HEAD)
@@ -44,3 +44,7 @@ push: container
 
 rsync: 
 	rsync -azvh docker-compose.yml root@192.168.20.23:/data/compose/sme-api
+
+gen: 
+	xorm reverse mysql root:root@/sme?charset=utf8 pkg/templates/goxorm pkg
+

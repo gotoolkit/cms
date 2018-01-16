@@ -2,39 +2,54 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
-
-	"github.com/gotoolkit/cms/pkg/teleport"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gotoolkit/cms/pkg/database"
-	"github.com/gotoolkit/cms/pkg/models"
+	"github.com/gotoolkit/cms/pkg/model"
+	"github.com/gotoolkit/cms/pkg/teleport"
 	jwt "gopkg.in/dgrijalva/jwt-go.v3"
 )
 
 func register(c *gin.Context) {
-	var user models.User
+	var user model.PurchaseUser
 
 	err := c.BindJSON(&user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": "Missing Username or Password",
-		})
+		log.Println(err)
+		abortWithStatus(c, http.StatusBadRequest, fmt.Sprintf("Missing Username or Password: %v", err))
 		return
 	}
 
-	if !database.GetDB().Where("username = ?", user.Username).First(&models.User{}).RecordNotFound() {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": "User already registed",
-		})
+	has, err := database.GetDB().Where("username = ?", user.Username).Get(&model.PurchaseUser{})
+	if err != nil {
+		log.Println(err)
+
+		abortWithStatus(c, http.StatusBadRequest, fmt.Sprintf("Database connection failed: %v", err))
 		return
 	}
+	if has {
+		log.Println(err)
 
-	database.GetDB().Create(&user)
+		abortWithStatus(c, http.StatusBadRequest, "User has already registed")
+		return
+	}
+	user.UsernameCanonical = user.Username
+	user.EmailCanonical = user.Email
+	user.ConfirmationToken = strconv.Itoa(int(time.Now().UnixNano()))
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+	_, err = database.GetDB().Insert(&user)
+
+	if err != nil {
+		log.Println(err)
+		abortWithStatus(c, http.StatusBadRequest, fmt.Sprintf("Create new user failed: %v", err))
+		return
+	}
 
 	// Create the token
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
@@ -45,12 +60,10 @@ func register(c *gin.Context) {
 	claims["exp"] = expire.Unix()
 	claims["orig_iat"] = time.Now().Unix()
 
-	tokenString, err := token.SignedString([]byte("secret key"))
+	tokenString, err := token.SignedString([]byte("sme360 secret key"))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"code":    http.StatusUnauthorized,
-			"message": "Create JWT Token faild",
-		})
+		log.Println(err)
+		abortWithStatus(c, http.StatusUnauthorized, fmt.Sprintf("Create JWT Token faild: %v", err))
 		return
 	}
 
@@ -62,20 +75,27 @@ func register(c *gin.Context) {
 
 func sendMessage(c *gin.Context) {
 	phone := c.Param("phone")
+	has, err := database.GetDB().Where("mobile = ?", phone).Get(&model.PurchaseUser{})
+	if err != nil {
+		abortWithStatus(c, http.StatusBadRequest, fmt.Sprintf("Database connection failed: %v", err))
+		return
+	}
+
+	if has {
+		abortWithStatus(c, http.StatusBadRequest, fmt.Sprintf("Phone already registed: %v", err))
+		return
+	}
+
 	rand.Seed(time.Now().UnixNano())
 	code := rand.Intn(999999-99999) + 99999
-	err := teleport.SendMessage(fmt.Sprintf("phone: %s \ncode: %d", phone, code))
+	err = teleport.SendMessage(fmt.Sprintf("phone: %s \ncode: %d", phone, code))
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": "send telegram message failed",
-			"error":   err.Error(),
-		})
+		abortWithStatus(c, http.StatusBadRequest, fmt.Sprintf("Send telegram message failed: %v", err))
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
-		"message": "Message sended",
+		"message": code,
 	})
 }

@@ -40,9 +40,19 @@ func Router(buildTime, commit, release string) *gin.Engine {
 	{
 		auth.GET("/hello", helloHandler)
 		auth.GET("/refresh_token", middlewares.Jwt().RefreshHandler)
+
+		companyRest(auth, &company{})
 	}
 
 	return r
+}
+
+func companyRest(rg *gin.RouterGroup, c *company) {
+
+	rg.GET("/company", c.GetAll())
+	rg.GET("/company/:id", c.Get())
+	rg.POST("/company/:id", c.Create())
+	rg.DELETE("/company/:id", c.Delete())
 }
 
 func debugRouter(r *gin.Engine) {
@@ -64,5 +74,12 @@ func helloHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"userID": claims["id"],
 		"text":   "Hello World.",
+	})
+}
+
+func abortWithStatus(c *gin.Context, code int, msg string) {
+	c.AbortWithStatusJSON(code, gin.H{
+		"code":    code,
+		"message": msg,
 	})
 }
