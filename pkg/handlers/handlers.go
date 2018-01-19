@@ -10,6 +10,7 @@ import (
 	jwt "github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/gotoolkit/cms/pkg/middlewares"
+	"github.com/gotoolkit/cms/pkg/model"
 )
 
 func Router(buildTime, commit, release string) *gin.Engine {
@@ -36,24 +37,19 @@ func Router(buildTime, commit, release string) *gin.Engine {
 	r.POST("/signup", register)
 	r.GET("message/:phone", sendMessage)
 
+	r.GET("/firm", GetAll(&model.PurchaseCompany{}))
+	r.GET("/firm/:id", Get(&model.PurchaseCompany{}))
+	r.POST("/firm/:id", Create(&model.PurchaseCompany{}))
+	r.DELETE("/firm/:id", Delete(&model.PurchaseCompany{}))
+
 	auth := r.Group("/auth")
 	auth.Use(middlewares.Jwt().MiddlewareFunc())
 	{
 		auth.GET("/hello", helloHandler)
 		auth.GET("/refresh_token", middlewares.Jwt().RefreshHandler)
-
-		companyRest(auth, &company{})
 	}
 
 	return r
-}
-
-func companyRest(rg *gin.RouterGroup, c *company) {
-
-	rg.GET("/company", c.GetAll())
-	rg.GET("/company/:id", c.Get())
-	rg.POST("/company/:id", c.Create())
-	rg.DELETE("/company/:id", c.Delete())
 }
 
 func debugRouter(r *gin.Engine) {

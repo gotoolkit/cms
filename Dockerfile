@@ -6,5 +6,7 @@ ENV MYSQL_DATABASE root:root@tcp(docker.for.mac.localhost:3306)/sme?charset=utf8
 ENV TELEGRAM_HORN_URL https://bot.wilead.com/api/tom
 EXPOSE $PORT
 
+WORKDIR /sme/cms/
+
 COPY cms /
 CMD [ "/cms" ]

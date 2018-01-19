@@ -33,6 +33,7 @@ container: build
 run: container
 	docker stop ${APP} || true && docker rm ${APP} || true
 	docker run --name ${APP} -p ${PORT}:${PORT} --rm \
+		-v ${PWD}/data:/sme/cms \
 		-e "PORT=${PORT}" \
 		-e "MYSQL_DATABASE=${MYSQL_DATABASE}" \
 		-e "TELEGRAM_HORN_URL=${TELEGRAM_HORN_URL}" \
