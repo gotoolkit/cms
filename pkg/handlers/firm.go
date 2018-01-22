@@ -49,6 +49,13 @@ func Create(v interface{}) gin.HandlerFunc {
 			c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
 			return
 		}
+		// name := c.PostForm("name")
+		// phone := c.PostForm("phone")
+		// website := c.PostForm("website")
+		// address := c.PostForm("address")
+		// category := c.PostForm("category")
+
+		database.GetDB().Insert()
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
 			"message": "file uploaded",

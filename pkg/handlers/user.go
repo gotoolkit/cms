@@ -39,10 +39,13 @@ func register(c *gin.Context) {
 		return
 	}
 	user.UsernameCanonical = user.Username
+	user.Email= user.Username
 	user.EmailCanonical = user.Email
 	user.ConfirmationToken = strconv.Itoa(int(time.Now().UnixNano()))
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
+	user.Roles = "a:0:{}"
+	user.Configs = "a:0:{}"
 	_, err = database.GetDB().Insert(&user)
 
 	if err != nil {

@@ -14,6 +14,8 @@ services:
     restart: always
     labels: 
       - com.centurylinklabs.watchtower.enable=true
+    extra_hosts: 
+      - mysql:192.168.20.25
     environment: 
       - PORT=8000
       - MYSQL_DATABASE=root:root@tcp(mysql:3306)/sme?charset=utf8mb4&parseTime=true
